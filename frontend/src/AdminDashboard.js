@@ -52,7 +52,7 @@ export const AdminDashboard = () => {
         <div className='logo-name'>
           <div className='logo-image'>
             <img
-              src='images/logo.png'
+              src='Images/logo.png'
               alt=''
             />
           </div>
@@ -132,7 +132,7 @@ export const AdminDashboard = () => {
           </div>
 
           <img
-            src='images/profile.jpg'
+            src='Images/profile.jpg'
             alt=''
           />
         </div>

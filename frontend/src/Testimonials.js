@@ -89,7 +89,7 @@ export const Testimonials = () => {
           <li className='test_card'>
             <div className='img'>
               <img
-                src='images/img-1.jpg'
+                src='Images/img-1.jpg'
                 alt='img'
                 draggable='false'
               />
@@ -108,7 +108,7 @@ export const Testimonials = () => {
           <li className='test_card'>
             <div className='img'>
               <img
-                src='images/img-2.jpg'
+                src='Images/img-2.jpg'
                 alt='img'
                 draggable='false'
               />
@@ -127,7 +127,7 @@ export const Testimonials = () => {
           <li className='test_card'>
             <div className='img'>
               <img
-                src='images/img-3.jpg'
+                src='Images/img-3.jpg'
                 alt='img'
                 draggable='false'
               />
@@ -146,7 +146,7 @@ export const Testimonials = () => {
           <li className='test_card'>
             <div className='img'>
               <img
-                src='images/img-4.jpg'
+                src='Images/img-4.jpg'
                 alt='img'
                 draggable='false'
               />
@@ -165,7 +165,7 @@ export const Testimonials = () => {
           <li className='test_card'>
             <div className='img'>
               <img
-                src='images/img-5.jpg'
+                src='Images/img-5.jpg'
                 alt='img'
                 draggable='false'
               />
@@ -184,7 +184,7 @@ export const Testimonials = () => {
           <li className='test_card'>
             <div className='img'>
               <img
-                src='images/img-6.jpg'
+                src='Images/img-6.jpg'
                 alt='img'
                 draggable='false'
               />
