@@ -1,0 +1,28 @@
+.profile_body {
+  background: #F0F8FF;
+  display: grid;
+  align-items: normal;
+  height: 100%;
+}
+
+.card {
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 15px 1px rgba(52, 40, 104, .08);
+}
+
+.p-inplace-content input {
+  padding: 8px;
+}
+
+.p-inplace-content-close {
+  border-radius: 8px;
+  height: 42px;
+  margin-left: 5px;
+  width: 45px;
+}
+
+.reject_class {
+  outline: none !important;
+  border-radius: 8px;
+  margin-left: 10px;
+}

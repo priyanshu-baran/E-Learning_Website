@@ -1,0 +1,258 @@
+::selection {
+  background: #6d50e2;
+  color: #fff;
+}
+
+.course_body {
+  padding-top: 50px;
+  position: relative;
+  z-index: 99;
+}
+
+.course_container {
+  width: calc(50%-20px);
+  padding: 40px 50px 40px 40px;
+  background: #fff;
+  margin: 25px 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.course_container .topic {
+  font-size: 30px;
+  font-weight: 500;
+  margin-bottom: 30px;
+}
+
+.course_content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.course_content .list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 30%;
+  margin-right: 50px;
+  position: relative;
+}
+
+.course_content .list label {
+  height: 60px;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 60px;
+  cursor: pointer;
+  padding-left: 25px;
+  transition: all 0.5s ease;
+  color: #333;
+  z-index: 12;
+}
+
+[id^="course_home_"]:checked~.list label.course_home,
+[id^="blog_"]:checked~.list label.blog,
+[id^="help_"]:checked~.list label.help,
+[id^="code_"]:checked~.list label.code,
+[id^="about_"]:checked~.list label.about {
+  color: #fff;
+}
+
+.course_content .list label:hover {
+  color: #6d50e2;
+}
+
+.course_content .slider {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 60px;
+  width: 100%;
+  border-radius: 12px;
+  background: #6d50e2;
+  transition: all 0.4s ease;
+}
+
+[id^="course_home_"]:checked~.list .slider {
+  top: 0;
+}
+
+[id^="blog_"]:checked~.list .slider {
+  top: 68px;
+}
+
+[id^="help_"]:checked~.list .slider {
+  top: 135px;
+}
+
+[id^="code_"]:checked~.list .slider {
+  top: 202px;
+}
+
+[id^="about_"]:checked~.list .slider {
+  top: 270px;
+}
+
+.course_content .text-content {
+  width: 80%;
+  height: 100%;
+}
+
+.course_content .text {
+  display: none;
+
+}
+
+.course_content .text .title {
+  font-size: 25px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.course_content .text p {
+  text-align: justify;
+}
+
+.course_content .text-content .course_home {
+  display: block;
+  margin: auto;
+}
+
+[id^="course_home_"]:checked~.text-content .course_home,
+[id^="blog_"]:checked~.text-content .blog,
+[id^="help_"]:checked~.text-content .help,
+[id^="code_"]:checked~.text-content .code,
+[id^="about_"]:checked~.text-content .about {
+  display: block;
+}
+
+[id^="blog_"]:checked~.text-content .course_home,
+[id^="help_"]:checked~.text-content .course_home,
+[id^="code_"]:checked~.text-content .course_home,
+[id^="about_"]:checked~.text-content .course_home {
+  display: none;
+}
+
+.course_content input {
+  display: none;
+}
+
+.text .btn {
+  margin: 10px 0;
+  text-align: left;
+}
+
+.text .btn a {
+  text-decoration: none;
+  background: #e74c3c;
+  color: #f2f2f2;
+  padding: 5px 8px;
+  border-radius: 3px;
+  display: inline-flex;
+  transition: 0.2s;
+}
+
+.text .btn a:hover {
+  transform: scale(0.9);
+}
+
+@media (max-width:850px) {
+  .course_content .list {
+    width: 75px;
+    margin-right: 0;
+  }
+
+  .sidebar_headings {
+    display: none;
+  }
+}
+
+@media (max-width:450px) {
+  .course_container {
+    padding: 40px;
+  }
+
+  .course_content {
+    flex-direction: column;
+    align-items: normal;
+  }
+
+  .course_content .list {
+    flex-direction: row;
+    margin-left: 90px;
+  }
+
+  .course_content .list label {
+    padding-left: 35px;
+  }
+
+  [id^="course_home_"]:checked~.list .slider {
+    top: 0;
+    left: -100px;
+  }
+
+  [id^="blog_"]:checked~.list .slider {
+    top: 0;
+    left: -40px;
+  }
+
+  [id^="help_"]:checked~.list .slider {
+    top: 0;
+    left: 15px;
+  }
+
+  [id^="code_"]:checked~.list .slider {
+    top: 0;
+    left: 75px;
+  }
+
+  [id^="about_"]:checked~.list .slider {
+    top: 0;
+    left: 135px;
+  }
+
+  .course_content .text-content {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width:400px) {
+  .course_content .list {
+    margin-left: 75px;
+  }
+
+  .course_content .list label {
+    padding-left: 40px;
+  }
+
+  .course_content .slider {
+    width: 80%;
+  }
+
+  [id^="course_home_"]:checked~.list .slider {
+    top: 0;
+    left: -98px;
+  }
+
+  [id^="blog_"]:checked~.list .slider {
+    top: 0;
+    left: -36px;
+  }
+
+  [id^="help_"]:checked~.list .slider {
+    top: 0;
+    left: 24px;
+  }
+
+  [id^="code_"]:checked~.list .slider {
+    top: 0;
+    left: 90px;
+  }
+
+  [id^="about_"]:checked~.list .slider {
+    top: 0;
+    left: 152px;
+  }
+}
