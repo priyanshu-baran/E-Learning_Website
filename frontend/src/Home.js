@@ -12,6 +12,7 @@ import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
 import { react_url } from '.';
+import logo from './Images/logo.png';
 import { Footer } from './Footer';
 import { Testimonials } from './Testimonials';
 import { Courses } from './Courses';
@@ -260,7 +261,8 @@ export const Home = ({ screenSize }) => {
               className='nav_logo'>
               <div className='logo-image'>
                 <img
-                  src='images/logo.png'
+                  // src='images/logo.png'
+                  src={logo}
                   alt=''
                 />
                 &nbsp;{screenSize > 500 ? 'ConnectLearn' : ''}
