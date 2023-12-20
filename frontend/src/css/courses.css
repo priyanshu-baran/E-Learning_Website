@@ -10,7 +10,6 @@
 }
 
 .course_container {
-  width: calc(50%-20px);
   padding: 40px 50px 40px 40px;
   background: #fff;
   margin: 25px 20px;

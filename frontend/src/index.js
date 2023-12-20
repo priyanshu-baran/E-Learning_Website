@@ -20,6 +20,7 @@ import './css/profile.css';
 import { App } from './App';
 
 export const react_url = 'http://localhost:5000';
+// export const react_url = 'https://connect-learn.netlify.app';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
