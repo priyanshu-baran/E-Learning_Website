@@ -5,38 +5,75 @@ import { Inplace, InplaceDisplay, InplaceContent } from 'primereact/inplace';
 import { InputText } from 'primereact/inputtext';
 import { Tooltip } from 'primereact/tooltip';
 import { Image } from 'primereact/image';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+import { Divider } from 'primereact/divider';
+import { Password } from 'primereact/password';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { react_url } from '.';
+import {
+  confirmResetPassword,
+  deleteUser,
+  resendSignUpCode,
+  resetPassword,
+  updatePassword,
+} from 'aws-amplify/auth';
+import Cookies from 'js-cookie';
 
 export const Profile = ({ screenSize }) => {
   const usenavigate = useNavigate('');
+  const [confirmationCode, setConfirmationCode] = useState('');
+  const [visible, setVisible] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newPasswordDialog, setNewPasswordDialog] = useState('');
   const [usersEmailID, setUsersEmailID] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [text, setText] = useState({
-    linkedIn: '',
+    linkedin: '',
     twitter: '',
     github: '',
     instagram: '',
     facebook: '',
+    email: '',
   });
   const [publicInfo, setPublicInfo] = useState({
     username: '',
     bio: '',
-    email: usersEmailID,
+    email: '',
   });
   const [privateInfo, setPrivateInfo] = useState({
+    email: '',
     firstname: '',
     lastname: '',
-    email: usersEmailID,
   });
+  const header = <div className='font-bold mb-3'>Pick a password</div>;
+  const footer = (
+    <>
+      <Divider />
+      <p className='mt-2'>Suggestions</p>
+      <ul className='pl-2 ml-2 mt-0 line-height-3'>
+        <li>At least one lowercase</li>
+        <li>At least one uppercase</li>
+        <li>At least one numeric</li>
+        <li>Minimum 8 characters</li>
+      </ul>
+    </>
+  );
   const accountDeletion = async () => {
-    const response = await axios.get(
-      'https://jsonplaceholder.typicode.com/users'
-    );
-    return response;
+    try {
+      await deleteUser();
+      sessionStorage.removeItem('isValidUser');
+      sessionStorage.removeItem('usersEmailID');
+      Cookies.remove('isValidUser');
+      Cookies.remove('usersEmailID');
+      usenavigate('/');
+    } catch (error) {
+      console.log(error);
+    }
   };
   const confirm = (event) => {
     confirmPopup({
@@ -122,28 +159,112 @@ export const Profile = ({ screenSize }) => {
       success: 'Profile Updated Successfully',
     });
   };
+  const handleResetPassword = async () => {
+    try {
+      const output = await resetPassword({ username: usersEmailID });
+      handleResetPasswordNextSteps(output);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleConfirmResetPassword = async () => {
+    try {
+      await confirmResetPassword({
+        username: usersEmailID,
+        confirmationCode,
+        newPassword: newPasswordDialog,
+      });
+      const mockOutput = {
+        nextStep: {
+          resetPasswordStep: 'DONE',
+        },
+      };
+      handleResetPasswordNextSteps(mockOutput);
+      toast.success('Successfully reset password.');
+    } catch (error) {
+      console.error('Error resetting password', error);
+    }
+  };
+  const handleResetPasswordNextSteps = async (output) => {
+    const { nextStep } = output;
+    switch (nextStep.resetPasswordStep) {
+      case 'CONFIRM_RESET_PASSWORD_WITH_CODE':
+        const codeDeliveryDetails = nextStep.codeDeliveryDetails;
+        toast.success(
+          `Verification code sent to ${codeDeliveryDetails.destination}`
+        );
+        setVisible(true);
+        break;
+      case 'DONE':
+        setVisible(false);
+        toast.success('Successfully reset password.');
+        break;
+      default:
+        toast.error('Error resetting password');
+    }
+  };
+  const handleResendCode = async () => {
+    try {
+      await resendSignUpCode({ username: usersEmailID });
+      toast.success('Code Resent Successfully');
+    } catch (error) {
+      console.error('Error resending code', error);
+      toast.error('Code Resend failed');
+    }
+  };
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    try {
+      await updatePassword({ oldPassword, newPassword });
+      toast.success('Password updated successfully');
+    } catch (err) {
+      console.log(err);
+    }
+  };
   useEffect(() => {
     const storedUsersEmailID =
-      localStorage.getItem('usersEmailID') ||
-      sessionStorage.getItem('usersEmailID');
+      Cookies.get('usersEmailID') || sessionStorage.getItem('usersEmailID');
     setUsersEmailID(storedUsersEmailID);
-    setPublicInfo((prevState) => ({
-      ...prevState,
-      email: storedUsersEmailID,
-    }));
-    setPrivateInfo((prevState) => ({
-      ...prevState,
-      email: storedUsersEmailID,
-    }));
-    axios
-      .get(`${react_url}/userdetails/${storedUsersEmailID}`)
-      .then((res) => {
-        setCurrentUser(res.data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }, [usersEmailID]);
+    const fetchDetails = async () => {
+      try {
+        if (storedUsersEmailID) {
+          const response = await axios.get(
+            `${react_url}/userdetails/${storedUsersEmailID}`
+          );
+          const userData = response.data;
+          setCurrentUser(userData);
+          setPublicInfo((prevState) => ({
+            ...prevState,
+            username: userData.username,
+            bio: userData.bio,
+            email: userData.email,
+          }));
+          setPrivateInfo((prevState) => ({
+            ...prevState,
+            email: userData.email,
+            firstname: userData.firstname,
+            lastname: userData.lastname,
+          }));
+          setText((prevState) => ({
+            ...prevState,
+            linkedin: userData.linkedin,
+            instagram: userData.instagram,
+            github: userData.github,
+            twitter: userData.twitter,
+            facebook: userData.facebook,
+            email: userData.email,
+          }));
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    toast.promise(fetchDetails(), {
+      loading: 'Getting your details...',
+      error: 'Error in getting your details',
+      success: 'Details Recieved Successfully',
+    });
+  }, []);
   return (
     <div className='profile_body'>
       <div className='container p-0'>
@@ -298,22 +419,30 @@ export const Profile = ({ screenSize }) => {
                 <div className='d-flex align-items-center'>
                   <Tooltip target='.fa-linkedin' />
                   <i
-                    onClick={() => handleSocialLinks(text.linkedIn, 'linkedin')}
+                    onClick={() => handleSocialLinks(text.linkedin, 'linkedin')}
                     style={{ cursor: 'pointer' }}
                     data-pr-tooltip='LinkedIn'
                     data-pr-position='Left'
                     data-pr-at='left-2 top'
                     data-pr-my='right center+7'
                     className='fab fa-linkedin'></i>
-                  <Inplace closable>
+                  <Inplace
+                    closable
+                    onClose={async () => {
+                      const updatedText = { ...text, email: usersEmailID };
+                      text.linkedin &&
+                        (await axios
+                          .post(`${react_url}/userdetails/add`, updatedText)
+                          .then(() => toast.success('Updated')));
+                    }}>
                     <InplaceDisplay>
-                      {text.linkedIn || 'https://www.linkedin.com/in/'}
+                      {text.linkedin || 'https://www.linkedin.com/in/'}
                     </InplaceDisplay>
                     <InplaceContent>
                       <InputText
-                        value={text.linkedIn}
+                        value={text.linkedin}
                         onChange={(e) =>
-                          setText({ ...text, linkedIn: e.target.value })
+                          setText({ ...text, linkedin: e.target.value })
                         }
                         autoFocus
                       />
@@ -333,7 +462,15 @@ export const Profile = ({ screenSize }) => {
                     data-pr-at='left-2 top'
                     data-pr-my='right center+7'
                     className='fab fa-instagram'></i>
-                  <Inplace closable>
+                  <Inplace
+                    closable
+                    onClose={async () => {
+                      const updatedText = { ...text, email: usersEmailID };
+                      text.instagram &&
+                        (await axios
+                          .post(`${react_url}/userdetails/add`, updatedText)
+                          .then(() => toast.success('Updated')));
+                    }}>
                     <InplaceDisplay>
                       {text.instagram || 'https://www.instagram.com/'}
                     </InplaceDisplay>
@@ -359,7 +496,15 @@ export const Profile = ({ screenSize }) => {
                     data-pr-at='left-2 top'
                     data-pr-my='right center+7'
                     className='fab fa-github'></i>
-                  <Inplace closable>
+                  <Inplace
+                    closable
+                    onClose={async () => {
+                      const updatedText = { ...text, email: usersEmailID };
+                      text.github &&
+                        (await axios
+                          .post(`${react_url}/userdetails/add`, updatedText)
+                          .then(() => toast.success('Updated')));
+                    }}>
                     <InplaceDisplay>
                       {text.github || 'https://github.com/'}
                     </InplaceDisplay>
@@ -385,7 +530,15 @@ export const Profile = ({ screenSize }) => {
                     data-pr-at='left-2 top'
                     data-pr-my='right center+7'
                     className='fab fa-twitter'></i>
-                  <Inplace closable>
+                  <Inplace
+                    closable
+                    onClose={async () => {
+                      const updatedText = { ...text, email: usersEmailID };
+                      text.twitter &&
+                        (await axios
+                          .post(`${react_url}/userdetails/add`, updatedText)
+                          .then(() => toast.success('Updated')));
+                    }}>
                     <InplaceDisplay>
                       {text.twitter || 'https://twitter.com/'}
                     </InplaceDisplay>
@@ -411,7 +564,15 @@ export const Profile = ({ screenSize }) => {
                     data-pr-at='left-2 top'
                     data-pr-my='right center+7'
                     className='fab fa-facebook'></i>
-                  <Inplace closable>
+                  <Inplace
+                    closable
+                    onClose={async () => {
+                      const updatedText = { ...text, email: usersEmailID };
+                      text.facebook &&
+                        (await axios
+                          .post(`${react_url}/userdetails/add`, updatedText)
+                          .then(() => toast.success('Updated')));
+                    }}>
                     <InplaceDisplay>
                       {text.facebook || 'https://www.facebook.com/'}
                     </InplaceDisplay>
@@ -999,7 +1160,7 @@ export const Profile = ({ screenSize }) => {
                   <div className='card-body'>
                     <h5 className='card-title'>Change Password</h5>
                     <hr />
-                    <form>
+                    <form onSubmit={handleUpdatePassword}>
                       <div className='form-group'>
                         <label htmlFor='inputPasswordCurrent'>
                           Current password
@@ -1008,13 +1169,15 @@ export const Profile = ({ screenSize }) => {
                           type='password'
                           className='form-control'
                           id='inputPasswordCurrent'
+                          value={oldPassword}
+                          onChange={(e) => setOldPassword(e.target.value)}
                         />
                         <small>
                           <a
                             style={{
                               color: 'blue',
                             }}
-                            href='#'>
+                            onClick={handleResetPassword}>
                             Forgot your password?
                           </a>
                         </small>
@@ -1025,9 +1188,11 @@ export const Profile = ({ screenSize }) => {
                           type='password'
                           className='form-control'
                           id='inputPasswordNew'
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
                         />
                       </div>
-                      <div className='form-group'>
+                      {/* <div className='form-group'>
                         <label htmlFor='inputPasswordNew2'>
                           Verify password
                         </label>
@@ -1036,7 +1201,7 @@ export const Profile = ({ screenSize }) => {
                           className='form-control'
                           id='inputPasswordNew2'
                         />
-                      </div>
+                      </div> */}
                       <button
                         type='submit'
                         className='btn btn-primary'>
@@ -1071,6 +1236,56 @@ export const Profile = ({ screenSize }) => {
                   </div>
                 </div>
               </div>
+              <Dialog
+                header='Reset Password'
+                visible={visible}
+                position='top'
+                style={{ width: '50vw' }}
+                onHide={() => setVisible(false)}
+                draggable={false}
+                resizable={false}
+                closeOnEscape={false}
+                closable={false}>
+                <p className='m-0'>
+                  Enter the confirmation code sent to your email address and
+                  then the new password you want to set.
+                </p>
+                <InputText
+                  style={{ height: '40px', marginTop: '10px' }}
+                  value={confirmationCode}
+                  onChange={(e) => setConfirmationCode(e.target.value)}
+                  placeholder='Confirmation Code'
+                  autoFocus
+                />
+                <br />
+                <br />
+                <span className='p-float-label'>
+                  <Password
+                    id='newPasswordDialog'
+                    style={{ height: '40px' }}
+                    value={newPasswordDialog}
+                    onChange={(e) => setNewPasswordDialog(e.target.value)}
+                    header={header}
+                    footer={footer}
+                    toggleMask
+                  />
+                  <label htmlFor='newPasswordDialog'>New Password</label>
+                </span>
+                <div className='flex flex-wrap justify-content-center gap-3'>
+                  <Button
+                    onClick={handleResendCode}
+                    style={{ borderRadius: '8px', outline: 'none' }}
+                    label='Re-send code'
+                  />
+                  <Button
+                    style={{ borderRadius: '8px', outline: 'none' }}
+                    onClick={handleConfirmResetPassword}
+                    label='Submit'
+                    icon='pi pi-check'
+                    severity='success'
+                  />
+                </div>
+              </Dialog>
             </div>
           </div>
         </div>

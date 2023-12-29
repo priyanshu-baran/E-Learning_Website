@@ -5,11 +5,25 @@ import { useNavigate } from 'react-router-dom';
 import { Badge } from 'primereact/badge';
 import { Tooltip } from 'primereact/tooltip';
 import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
 import { Menu } from 'primereact/menu';
 import { Dropdown } from 'primereact/dropdown';
 import { MultiStateCheckbox } from 'primereact/multistatecheckbox';
+import { InputText } from 'primereact/inputtext';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import {
+  signIn,
+  signUp,
+  confirmSignUp,
+  resendSignUpCode,
+  signOut,
+  resetPassword,
+  confirmResetPassword,
+} from 'aws-amplify/auth';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import Cookies from 'js-cookie';
 
 import { react_url } from '.';
 import { Footer } from './Footer';
@@ -20,8 +34,17 @@ import { Pagination } from './Pagination';
 import { Preloader } from './Preloader';
 import { Speeddial } from './Speeddial';
 import { Pricing } from './Pricing';
+import { Password } from 'primereact/password';
+import { Divider } from 'primereact/divider';
 
 export const Home = ({ screenSize }) => {
+  const [modalChange, setModalChange] = useState(false);
+  const [visible2, setVisible2] = useState(false);
+  const [username, setUsername] = useState('');
+  const [newPasswordDialog, setNewPasswordDialog] = useState('');
+  const [awsUsername, setAwsUsername] = useState('');
+  const [confirmationCode, setConfirmationCode] = useState('');
+  const [visible, setVisible] = useState(false);
   const [value, setValue] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState([]);
@@ -58,43 +81,107 @@ export const Home = ({ screenSize }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const usenavigate = useNavigate('');
-  const validation = () => {
-    let result = true;
-    if (email === '' || email === null) {
-      result = false;
-    }
-    if (pass === '' || pass === null) {
-      result = false;
-    }
-    return result;
-  };
-  const handleLoginForm = (e) => {
+  const header = <div className='font-bold mb-3'>Pick a password</div>;
+  const footer = (
+    <>
+      <Divider />
+      <p className='mt-2'>Suggestions</p>
+      <ul className='pl-2 ml-2 mt-0 line-height-3'>
+        <li>At least one lowercase</li>
+        <li>At least one uppercase</li>
+        <li>At least one numeric</li>
+        <li>Minimum 8 characters</li>
+      </ul>
+    </>
+  );
+  const validationSchema = Yup.object({
+    fullname: Yup.string().required('*Name is required'),
+    email: Yup.string()
+      .required('*Email is required')
+      .matches(/^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Invalid email address'),
+    password: Yup.string()
+      .required('*Password is required')
+      .min(8, 'Password is too small'),
+    coPassword: Yup.string()
+      .oneOf([Yup.ref('password'), null], 'Passwords must match')
+      .required('*Confirm Password is required'),
+  });
+  const handleLoginForm = async (e) => {
     e.preventDefault();
-    if (validation) {
-      if (email === 'raj@gmail.com' && pass === 'raj') {
-        sessionStorage.setItem('isValidUser', true);
-        sessionStorage.setItem('usersEmailID', email);
-        isChecked && localStorage.setItem('isValidUser', true);
-        isChecked && localStorage.setItem('usersEmailID', email);
-        setShowForm(false);
+    if (email === 'admin@gmail.com' && pass === 'admin') {
+      usenavigate('/admin');
+      toast.success('Admin Logged In Successfully');
+    }
+    try {
+      await signIn({ username: email, password: pass });
+      sessionStorage.setItem('isValidUser', true);
+      sessionStorage.setItem('usersEmailID', email);
+      isChecked && Cookies.set('isValidUser', true, { expires: 30 });
+      isChecked && Cookies.set('usersEmailID', email, { expires: 30 });
+      toast.success('Logged In Successfully');
+      setShowForm(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error signing in:', error);
+      toast.error('Invalid Credentials');
+    }
+  };
+  const handleSignOut = async () => {
+    try {
+      await signOut({ global: true });
+      setIsValidUser(false);
+      sessionStorage.removeItem('isValidUser');
+      sessionStorage.removeItem('usersEmailID');
+      toast.success('Logged out Successfully');
+    } catch (error) {
+      console.log('error signing out: ', error);
+    }
+  };
+  const handleSignupForm = async (values) => {
+    const { fullname, email, password } = values;
+    try {
+      const { isSignUpComplete } = await signUp({
+        username: email,
+        password: password,
+        options: {
+          userAttributes: {
+            email,
+            preferred_username: fullname,
+          },
+        },
+      });
+      setAwsUsername(email);
+      setShowForm(false);
+      !isSignUpComplete && setVisible(true);
+    } catch (error) {
+      console.error('Error signing up:', error);
+      toast.error('Signup failed');
+    }
+  };
+  const handleSignUpConfirmation = async () => {
+    try {
+      const { isSignUpComplete } = await confirmSignUp({
+        username: awsUsername,
+        confirmationCode,
+      });
+      isSignUpComplete && setVisible(false);
+      toast.success('Signup Successful');
+      setTimeout(() => {
         window.location.reload();
-        toast.success('Logged In Successfully');
-      } else if (email === 'admin@gmail.com' && pass === 'admin') {
-        usenavigate('/admin');
-        toast.success('Admin Logged In Successfully');
-      } else {
-        toast.error('Invalid Credentials');
-      }
+      }, 800);
+    } catch (error) {
+      console.log('Error confirming sign up', error);
+      toast.error('Code is invalid or expired');
     }
   };
-  const handleLogout = () => {
-    setIsValidUser(false);
-    sessionStorage.removeItem('isValidUser');
-    sessionStorage.removeItem('usersEmailID');
-    toast.success('Logged out Successfully');
-  };
-  const handleSignupForm = (e) => {
-    e.preventDefault();
+  const handleResendCode = async () => {
+    try {
+      await resendSignUpCode({ username: awsUsername });
+      toast.success('Code Resent Successfully');
+    } catch (error) {
+      console.error('Error resending code', error);
+      toast.error('Code Resend failed');
+    }
   };
   const handleFormOpen = () => {
     setShowForm((prevVisible) => !prevVisible);
@@ -119,6 +206,35 @@ export const Home = ({ screenSize }) => {
   };
   const handlePricing = () => {
     setIsOpen(!isOpen);
+  };
+  const handleResetPassword = async () => {
+    try {
+      const { nextStep } = await resetPassword({ username: username });
+      toast.success(
+        `Verification code sent to ${nextStep.codeDeliveryDetails.destination}`
+      );
+      setModalChange(true);
+    } catch (error) {
+      console.log(error);
+      toast.error('Given user is not found');
+    }
+  };
+  const handleConfirmResetPassword = async () => {
+    try {
+      await confirmResetPassword({
+        username: username,
+        confirmationCode,
+        newPassword: newPasswordDialog,
+      });
+      toast.success('Successfully changed password.');
+      setModalChange(false);
+      setVisible2(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 800);
+    } catch (error) {
+      console.error('Error resetting password', error);
+    }
   };
   const menuLeft = useRef(null);
   const items = [
@@ -161,8 +277,7 @@ export const Home = ({ screenSize }) => {
   ];
   useEffect(() => {
     const storedIsValidUser =
-      localStorage.getItem('isValidUser') ||
-      sessionStorage.getItem('isValidUser');
+      Cookies.get('isValidUser') || sessionStorage.getItem('isValidUser');
     if (storedIsValidUser) {
       setIsValidUser(true);
     } else {
@@ -341,7 +456,7 @@ export const Home = ({ screenSize }) => {
               }}
               onClick={
                 isValidUser && screenSize >= 1050
-                  ? handleLogout
+                  ? handleSignOut
                   : handleFormOpen
               }>
               {isValidUser && screenSize >= 1050 ? 'Logout' : 'Get Started'}
@@ -395,7 +510,8 @@ export const Home = ({ screenSize }) => {
                   </span>
                   <a
                     href='#'
-                    className='forgot_pw'>
+                    className='forgot_pw'
+                    onClick={() => setVisible2(true)}>
                     Forgot password?
                   </a>
                 </div>
@@ -411,63 +527,214 @@ export const Home = ({ screenSize }) => {
               </form>
             </div>
             <div className='form signup_form'>
-              <form onSubmit={handleSignupForm}>
-                <h2>Signup</h2>
-                <div className='input_box'>
-                  <input
-                    type='text'
-                    placeholder='Full Name'
-                    required
-                  />
-                  <i className='uil uil-user-circle name'></i>
-                </div>
-                <div className='input_box'>
-                  <input
-                    type='email'
-                    placeholder='Enter your email'
-                    required
-                  />
-                  <i className='uil uil-envelope-alt email'></i>
-                </div>
-                <div className='input_box'>
-                  <input
-                    type={passwordVisible1 ? 'text' : 'password'}
-                    placeholder='Create password'
-                    required
-                  />
-                  <i className='uil uil-lock password'></i>
-                  <i
-                    onClick={togglePasswordVisibility1}
-                    className={`uil ${
-                      passwordVisible1 ? 'uil-eye' : 'uil-eye-slash'
-                    } pw_hide`}></i>
-                </div>
-                <div className='input_box'>
-                  <input
-                    type={passwordVisible2 ? 'text' : 'password'}
-                    placeholder='Confirm password'
-                    required
-                  />
-                  <i className='uil uil-lock password'></i>
-                  <i
-                    onClick={togglePasswordVisibility2}
-                    className={`uil ${
-                      passwordVisible2 ? 'uil-eye' : 'uil-eye-slash'
-                    } pw_hide`}></i>
-                </div>
-                <button className='home_button'>Signup Now</button>
-                <div className='login_signup'>
-                  Already have an account?{' '}
-                  <a
-                    href='#'
-                    onClick={() => setIsActive(false)}>
-                    Login
-                  </a>
-                </div>
-              </form>
+              <Formik
+                initialValues={{
+                  fullname: '',
+                  email: '',
+                  password: '',
+                  coPassword: '',
+                }}
+                validationSchema={validationSchema}
+                onSubmit={handleSignupForm}>
+                <Form>
+                  <h2>Signup</h2>
+                  <div className='input_box'>
+                    <Field
+                      type='text'
+                      name='fullname'
+                      placeholder='Full Name'
+                      required
+                    />
+                    <ErrorMessage
+                      name='fullname'
+                      component='div'
+                      className='error'
+                    />
+                    <i className='uil uil-user-circle name'></i>
+                  </div>
+                  <div className='input_box'>
+                    <Field
+                      type='email'
+                      name='email'
+                      placeholder='Enter your email'
+                      required
+                    />
+                    <ErrorMessage
+                      name='email'
+                      component='div'
+                      className='error'
+                    />
+                    <i className='uil uil-envelope-alt email'></i>
+                  </div>
+                  <div className='input_box'>
+                    <Field
+                      type={passwordVisible1 ? 'text' : 'password'}
+                      placeholder='Create password'
+                      name='password'
+                      required
+                    />
+                    <ErrorMessage
+                      name='password'
+                      component='div'
+                      className='error'
+                    />
+                    <i className='uil uil-lock password'></i>
+                    <i
+                      onClick={togglePasswordVisibility1}
+                      className={`uil ${
+                        passwordVisible1 ? 'uil-eye' : 'uil-eye-slash'
+                      } pw_hide`}></i>
+                  </div>
+                  <div className='input_box'>
+                    <Field
+                      type={passwordVisible2 ? 'text' : 'password'}
+                      placeholder='Confirm password'
+                      name='coPassword'
+                      required
+                    />
+                    <ErrorMessage
+                      name='coPassword'
+                      component='div'
+                      className='error'
+                    />
+                    <i className='uil uil-lock password'></i>
+                    <i
+                      onClick={togglePasswordVisibility2}
+                      className={`uil ${
+                        passwordVisible2 ? 'uil-eye' : 'uil-eye-slash'
+                      } pw_hide`}></i>
+                  </div>
+                  <button
+                    type='submit'
+                    className='home_button'>
+                    Signup Now
+                  </button>
+                  <div className='login_signup'>
+                    Already have an account?{' '}
+                    <a
+                      href='#'
+                      onClick={() => setIsActive(false)}>
+                      Login
+                    </a>
+                  </div>
+                </Form>
+              </Formik>
             </div>
           </div>
         </section>
+        <Dialog
+          header={
+            <div className='font-bold mb-3'>
+              Forgot Password
+              <center>
+                <InputText
+                  style={{
+                    height: '40px',
+                    marginTop: '10px',
+                    width: '400px',
+                    textAlign: 'center',
+                  }}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder='Registered Email ID'
+                  autoFocus
+                />
+              </center>
+            </div>
+          }
+          visible={visible2}
+          position='top'
+          style={{ width: '50vw' }}
+          onHide={() => setVisible2(false)}
+          draggable={false}
+          resizable={false}>
+          <p className='m-0'>Enter the details to reset your password.</p>
+          <InputText
+            style={{ height: '40px', marginTop: '10px' }}
+            value={confirmationCode}
+            onChange={(e) => setConfirmationCode(e.target.value)}
+            placeholder='Confirmation Code'
+            disabled={modalChange ? false : true}
+            autoFocus
+          />
+          <br />
+          <br />
+          <span className='p-float-label'>
+            <Password
+              id='newPasswordDialog'
+              style={{ height: '40px' }}
+              value={newPasswordDialog}
+              onChange={(e) => setNewPasswordDialog(e.target.value)}
+              header={header}
+              footer={footer}
+              toggleMask
+            />
+            <label htmlFor='newPasswordDialog'>New Password</label>
+          </span>
+          {modalChange ? (
+            <div className='flex flex-wrap justify-content-center gap-3'>
+              <Button
+                onClick={handleResendCode}
+                style={{ borderRadius: '8px', outline: 'none' }}
+                label='Re-send code'
+              />
+              <Button
+                style={{ borderRadius: '8px', outline: 'none' }}
+                onClick={handleConfirmResetPassword}
+                label='Submit'
+                icon='pi pi-check'
+                severity='success'
+                disabled={confirmationCode ? false : true}
+              />
+            </div>
+          ) : (
+            <div className='flex flex-wrap justify-content-center gap-3'>
+              <Button
+                style={{ borderRadius: '8px', outline: 'none' }}
+                onClick={handleResetPassword}
+                label='Submit'
+                icon='pi pi-check'
+                severity='success'
+                disabled={username ? false : true}
+              />
+            </div>
+          )}
+        </Dialog>
+        <Dialog
+          header='Confirmation code'
+          visible={visible}
+          position='top'
+          style={{ width: '50vw' }}
+          onHide={() => setVisible(false)}
+          draggable={false}
+          resizable={false}
+          closeOnEscape={false}
+          closable={false}>
+          <p className='m-0'>
+            Enter the confirmation code sent to your email address
+          </p>
+          <InputText
+            style={{ height: '40px', marginTop: '10px' }}
+            value={confirmationCode}
+            onChange={(e) => setConfirmationCode(e.target.value)}
+            autoFocus
+            placeholder='Confirmation Code'
+          />
+          <div className='flex flex-wrap justify-content-center gap-3'>
+            <Button
+              onClick={handleResendCode}
+              style={{ borderRadius: '8px', outline: 'none' }}
+              label='Re-send code'
+            />
+            <Button
+              style={{ borderRadius: '8px', outline: 'none' }}
+              onClick={handleSignUpConfirmation}
+              label='Submit'
+              icon='pi pi-check'
+              severity='success'
+            />
+          </div>
+        </Dialog>
         {isValidUser && (
           <>
             <div className='main'>
@@ -582,15 +849,15 @@ export const Home = ({ screenSize }) => {
               <section id='speedDial'>
                 <Speeddial
                   handlePricing={handlePricing}
-                  handleLogout={handleLogout}
+                  handleLogout={handleSignOut}
                 />
               </section>
               <section id='testimonials'>
                 <Testimonials />
               </section>
-              <div id='cu'>
+              <section id='cu'>
                 <Footer handleFormOpen={handleFormOpen} />
-              </div>
+              </section>
             </div>
           </>
         )}
