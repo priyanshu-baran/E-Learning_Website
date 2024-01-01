@@ -11,8 +11,8 @@ import { Profile } from './Profile';
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: process.env.AMPLIFY_USERPOOL_ID,
-      userPoolClientId: process.env.AMPLIFY_WEBCLIENT_ID,
+      userPoolId: process.env.REACT_APP_AMPLIFY_USERPOOL_ID,
+      userPoolClientId: process.env.REACT_APP_AMPLIFY_WEBCLIENT_ID,
     },
   },
 });
