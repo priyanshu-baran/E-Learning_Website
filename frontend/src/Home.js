@@ -166,6 +166,7 @@ export const Home = ({ screenSize }) => {
       });
       isSignUpComplete && setVisible(false);
       toast.success('Signup Successful');
+      await axios.post(`${react_url}/userdetails/add`, { email: awsUsername });
       setTimeout(() => {
         window.location.reload();
       }, 800);

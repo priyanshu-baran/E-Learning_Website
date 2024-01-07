@@ -133,11 +133,19 @@ export const Profile = ({ screenSize }) => {
   const handlePublicInfoForm = (e) => {
     e.preventDefault();
     const publicInfoUpdate = async () => {
-      const response = await axios.post(
-        `${react_url}/userdetails/add`,
-        publicInfo
+      const res = await axios.get(`${react_url}/userdetails/`);
+      const isUsernameTaken = res.data.some(
+        (user) => user.username === publicInfo.username
       );
-      return response;
+      if (!isUsernameTaken) {
+        const response = await axios.post(
+          `${react_url}/userdetails/add`,
+          publicInfo
+        );
+        return response;
+      } else {
+        toast.error('Username already used');
+      }
     };
     toast.promise(publicInfoUpdate(), {
       loading: 'Pending...',
