@@ -245,11 +245,11 @@ export const Profile = ({ screenSize }) => {
             ...prevState,
             username: userData.username,
             bio: userData.bio,
-            email: userData.email,
+            email: storedUsersEmailID,
           }));
           setPrivateInfo((prevState) => ({
             ...prevState,
-            email: userData.email,
+            email: storedUsersEmailID,
             firstname: userData.firstname,
             lastname: userData.lastname,
           }));
@@ -260,7 +260,7 @@ export const Profile = ({ screenSize }) => {
             github: userData.github,
             twitter: userData.twitter,
             facebook: userData.facebook,
-            email: userData.email,
+            email: storedUsersEmailID,
           }));
         }
       } catch (error) {

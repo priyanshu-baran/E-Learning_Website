@@ -110,19 +110,20 @@ export const Home = ({ screenSize }) => {
     if (email === 'admin@gmail.com' && pass === 'admin') {
       usenavigate('/admin');
       toast.success('Admin Logged In Successfully');
-    }
-    try {
-      await signIn({ username: email, password: pass });
-      sessionStorage.setItem('isValidUser', true);
-      sessionStorage.setItem('usersEmailID', email);
-      isChecked && Cookies.set('isValidUser', true, { expires: 30 });
-      isChecked && Cookies.set('usersEmailID', email, { expires: 30 });
-      toast.success('Logged In Successfully');
-      setShowForm(false);
-      window.location.reload();
-    } catch (error) {
-      console.error('Error signing in:', error);
-      toast.error('Invalid Credentials');
+    } else {
+      try {
+        await signIn({ username: email, password: pass });
+        sessionStorage.setItem('isValidUser', true);
+        sessionStorage.setItem('usersEmailID', email);
+        isChecked && Cookies.set('isValidUser', true, { expires: 30 });
+        isChecked && Cookies.set('usersEmailID', email, { expires: 30 });
+        toast.success('Logged In Successfully');
+        setShowForm(false);
+        window.location.reload();
+      } catch (error) {
+        console.error('Error signing in:', error);
+        toast.error('Invalid Credentials');
+      }
     }
   };
   const handleSignOut = async () => {
