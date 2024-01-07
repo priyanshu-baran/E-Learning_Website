@@ -73,9 +73,8 @@ export const Home = ({ screenSize }) => {
   const [isValidUser, setIsValidUser] = useState(false);
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [passwordVisible1, setPasswordVisible1] = useState(false);
-  const [passwordVisible2, setPasswordVisible2] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(true);
+  const [passwordVisible2, setPasswordVisible2] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [isActive, setIsActive] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -91,6 +90,7 @@ export const Home = ({ screenSize }) => {
         <li>At least one uppercase</li>
         <li>At least one numeric</li>
         <li>Minimum 8 characters</li>
+        <li>Must include atleast one special character</li>
       </ul>
     </>
   );
@@ -99,9 +99,8 @@ export const Home = ({ screenSize }) => {
     email: Yup.string()
       .required('*Email is required')
       .matches(/^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Invalid email address'),
-    password: Yup.string()
-      .required('*Password is required')
-      .min(8, 'Password is too small'),
+    password: Yup.string().required('*Password is required'),
+    // .min(8, 'Password is too small'),
     coPassword: Yup.string()
       .oneOf([Yup.ref('password'), null], 'Passwords must match')
       .required('*Confirm Password is required'),
@@ -188,9 +187,6 @@ export const Home = ({ screenSize }) => {
   };
   const togglePasswordVisibility = () => {
     setPasswordVisible((prevVisible) => !prevVisible);
-  };
-  const togglePasswordVisibility1 = () => {
-    setPasswordVisible1((prevVisible) => !prevVisible);
   };
   const togglePasswordVisibility2 = () => {
     setPasswordVisible2((prevVisible) => !prevVisible);
@@ -485,7 +481,7 @@ export const Home = ({ screenSize }) => {
                 </div>
                 <div className='input_box'>
                   <input
-                    type={passwordVisible ? 'text' : 'password'}
+                    type={!passwordVisible ? 'text' : 'password'}
                     placeholder='Enter your password'
                     value={pass}
                     onChange={(e) => setPass(e.target.value)}
@@ -568,9 +564,14 @@ export const Home = ({ screenSize }) => {
                   </div>
                   <div className='input_box'>
                     <Field
-                      type={passwordVisible1 ? 'text' : 'password'}
+                      as={Password}
                       placeholder='Create password'
                       name='password'
+                      style={{ height: '40px', width: '280px' }}
+                      header={header}
+                      footer={footer}
+                      strongRegex='^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*<>?])(?=.{8,})'
+                      toggleMask
                       required
                     />
                     <ErrorMessage
@@ -579,15 +580,10 @@ export const Home = ({ screenSize }) => {
                       className='error'
                     />
                     <i className='uil uil-lock password'></i>
-                    <i
-                      onClick={togglePasswordVisibility1}
-                      className={`uil ${
-                        passwordVisible1 ? 'uil-eye' : 'uil-eye-slash'
-                      } pw_hide`}></i>
                   </div>
                   <div className='input_box'>
                     <Field
-                      type={passwordVisible2 ? 'text' : 'password'}
+                      type={!passwordVisible2 ? 'text' : 'password'}
                       placeholder='Confirm password'
                       name='coPassword'
                       required

@@ -348,6 +348,10 @@ a:hover {
   color: red;
 }
 
+.input_box .p-password i svg {
+  margin-top: 23px;
+}
+
 @media (max-width:1800px) {
   .course_body {
     grid-template-columns: repeat(1, 1fr);

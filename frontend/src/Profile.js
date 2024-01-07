@@ -60,6 +60,7 @@ export const Profile = ({ screenSize }) => {
         <li>At least one uppercase</li>
         <li>At least one numeric</li>
         <li>Minimum 8 characters</li>
+        <li>Must include atleast one special character</li>
       </ul>
     </>
   );
@@ -159,13 +160,20 @@ export const Profile = ({ screenSize }) => {
       success: 'Profile Updated Successfully',
     });
   };
-  const handleResetPassword = async () => {
-    try {
-      const output = await resetPassword({ username: usersEmailID });
-      handleResetPasswordNextSteps(output);
-    } catch (error) {
-      console.log(error);
-    }
+  const handleResetPassword = () => {
+    const handleForgotPassword = async () => {
+      try {
+        const output = await resetPassword({ username: usersEmailID });
+        handleResetPasswordNextSteps(output);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    toast.promise(handleForgotPassword(), {
+      loading: 'Processing...',
+      error: 'Error in processing forgot password functionality',
+      success: '',
+    });
   };
   const handleConfirmResetPassword = async () => {
     try {
@@ -1244,8 +1252,7 @@ export const Profile = ({ screenSize }) => {
                 onHide={() => setVisible(false)}
                 draggable={false}
                 resizable={false}
-                closeOnEscape={false}
-                closable={false}>
+                closeOnEscape={false}>
                 <p className='m-0'>
                   Enter the confirmation code sent to your email address and
                   then the new password you want to set.
@@ -1267,6 +1274,7 @@ export const Profile = ({ screenSize }) => {
                     onChange={(e) => setNewPasswordDialog(e.target.value)}
                     header={header}
                     footer={footer}
+                    strongRegex='^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[~!@#$%^&*<>?])(?=.{8,})'
                     toggleMask
                   />
                   <label htmlFor='newPasswordDialog'>New Password</label>
