@@ -112,27 +112,48 @@ export const Home = ({ screenSize }) => {
       toast.success('Admin Logged In Successfully');
     } else {
       try {
-        await signIn({ username: email, password: pass });
+        const waitSignin = async () => {
+          await signIn({ username: email, password: pass });
+        };
+        toast.promise(waitSignin(), {
+          loading: 'Processing Request...',
+          error: 'Error in logging in',
+          success: 'Logged In Successfully',
+        });
         sessionStorage.setItem('isValidUser', true);
         sessionStorage.setItem('usersEmailID', email);
         isChecked && Cookies.set('isValidUser', true, { expires: 30 });
         isChecked && Cookies.set('usersEmailID', email, { expires: 30 });
-        toast.success('Logged In Successfully');
         setShowForm(false);
-        window.location.reload();
+        const favoritesFromDatabase = await axios.get(
+          `${react_url}/userdetails/${email}`
+        );
+        sessionStorage.setItem(
+          'favorites',
+          JSON.stringify(favoritesFromDatabase.data.favoriteCourses)
+        );
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } catch (error) {
         console.error('Error signing in:', error);
         toast.error('Invalid Credentials');
       }
     }
   };
-  const handleSignOut = async () => {
+  const handleSignOut = () => {
     try {
-      await signOut({ global: true });
+      const waitSignout = async () => {
+        await signOut({ global: true });
+      };
+      toast.promise(waitSignout(), {
+        loading: 'Processing Request...',
+        error: 'Error in logging out',
+        success: 'Logged out Successfully',
+      });
       setIsValidUser(false);
       sessionStorage.removeItem('isValidUser');
       sessionStorage.removeItem('usersEmailID');
-      toast.success('Logged out Successfully');
     } catch (error) {
       console.log('error signing out: ', error);
     }
@@ -320,7 +341,8 @@ export const Home = ({ screenSize }) => {
       });
   }, []);
   useEffect(() => {
-    const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    const storedFavorites =
+      JSON.parse(sessionStorage.getItem('favorites')) || [];
     setIsFavorite(storedFavorites);
   }, [value]);
   const displayedCourses = courses
@@ -333,10 +355,8 @@ export const Home = ({ screenSize }) => {
           value === 'Favorite Courses' &&
           isFavorite.includes(selectedCourse.coursename)
         ) {
-          // console.log('me1');
           return selectedCourse.coursename.includes(course.coursename);
         } else {
-          // console.log('me2');
           return selectedCourse.coursename === undefined
             ? course.coursename === selectedCourse
             : course.coursename === selectedCourse.coursename;
@@ -542,6 +562,7 @@ export const Home = ({ screenSize }) => {
                       name='fullname'
                       placeholder='Full Name'
                       required
+                      autoComplete='off'
                     />
                     <ErrorMessage
                       name='fullname'
@@ -556,6 +577,7 @@ export const Home = ({ screenSize }) => {
                       name='email'
                       placeholder='Enter your email'
                       required
+                      autoComplete='off'
                     />
                     <ErrorMessage
                       name='email'

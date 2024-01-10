@@ -9,18 +9,34 @@ router.route('/').get((req, res) => {
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 
-router.route('/:email').get(async (req, res) => {
-  try {
-    const email = await User.findOne({ email: req.params.email });
-    if (!email) {
-      return res.status(404).json({ error: 'Email ID not found' });
+router
+  .route('/:email')
+  .get(async (req, res) => {
+    try {
+      const email = await User.findOne({ email: req.params.email });
+      if (!email) {
+        return res.status(404).json({ error: 'Email ID not found' });
+      }
+      res.json(email);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Server error' });
     }
-    res.json(email);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+  })
+  .delete(async (req, res) => {
+    try {
+      const deletedUser = await User.findOneAndDelete({
+        email: req.params.email,
+      });
+      if (!deletedUser) {
+        return res.status(404).json({ error: 'User not found for deletion' });
+      }
+      res.json({ message: 'User deleted successfully', deletedUser });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Server error during deletion' });
+    }
+  });
 
 router.route('/add').post(async (req, res) => {
   const {
@@ -35,11 +51,11 @@ router.route('/add').post(async (req, res) => {
     github,
     twitter,
     facebook,
+    favoriteCourses,
   } = req.body;
   try {
     let existingUser = await User.findOne({ email });
     if (existingUser) {
-      // Update only the fields that are provided in the request
       if (username !== undefined) existingUser.username = username;
       if (bio !== undefined) existingUser.bio = bio;
       if (profilepic !== undefined) existingUser.profilepic = profilepic;
@@ -50,12 +66,12 @@ router.route('/add').post(async (req, res) => {
       if (github !== undefined) existingUser.github = github;
       if (twitter !== undefined) existingUser.twitter = twitter;
       if (facebook !== undefined) existingUser.facebook = facebook;
+      if (favoriteCourses !== undefined)
+        existingUser.favoriteCourses = favoriteCourses;
       await existingUser.save();
       res.json('User profile updated!');
     } else {
-      // Create a new user with only the email field
       const newUser = new User({ email });
-      // Set other fields if provided
       if (username !== undefined) newUser.username = username;
       if (bio !== undefined) newUser.bio = bio;
       if (profilepic !== undefined) newUser.profilepic = profilepic;
@@ -66,6 +82,8 @@ router.route('/add').post(async (req, res) => {
       if (github !== undefined) newUser.github = github;
       if (twitter !== undefined) newUser.twitter = twitter;
       if (facebook !== undefined) newUser.facebook = facebook;
+      if (favoriteCourses !== undefined)
+        newUser.favoriteCourses = favoriteCourses;
       await newUser.save();
       res.json('New user created!');
     }

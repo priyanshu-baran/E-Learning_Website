@@ -76,7 +76,7 @@ export const Profile = ({ screenSize }) => {
       console.log(error);
     }
   };
-  const confirm = (event) => {
+  const confirm = async (event) => {
     confirmPopup({
       target: event.currentTarget,
       message: 'Are you sure you want to delete your account?',
@@ -90,6 +90,7 @@ export const Profile = ({ screenSize }) => {
           success: 'Account Deleted Successfully',
         }),
     });
+    await axios.delete(`${react_url}/userdetails/${usersEmailID}`);
   };
   const handleSocialLinks = (val, platform) => {
     if (val !== null && val !== '') {
@@ -241,46 +242,51 @@ export const Profile = ({ screenSize }) => {
     const storedUsersEmailID =
       Cookies.get('usersEmailID') || sessionStorage.getItem('usersEmailID');
     setUsersEmailID(storedUsersEmailID);
-    const fetchDetails = async () => {
-      try {
-        if (storedUsersEmailID) {
-          const response = await axios.get(
-            `${react_url}/userdetails/${storedUsersEmailID}`
-          );
-          const userData = response.data;
-          setCurrentUser(userData);
-          setPublicInfo((prevState) => ({
-            ...prevState,
-            username: userData.username,
-            bio: userData.bio,
-            email: storedUsersEmailID,
-          }));
-          setPrivateInfo((prevState) => ({
-            ...prevState,
-            email: storedUsersEmailID,
-            firstname: userData.firstname,
-            lastname: userData.lastname,
-          }));
-          setText((prevState) => ({
-            ...prevState,
-            linkedin: userData.linkedin,
-            instagram: userData.instagram,
-            github: userData.github,
-            twitter: userData.twitter,
-            facebook: userData.facebook,
-            email: storedUsersEmailID,
-          }));
+    if (storedUsersEmailID === '' || storedUsersEmailID === null) {
+      usenavigate('/');
+      toast.error('Login or Signup first');
+    } else {
+      const fetchDetails = async () => {
+        try {
+          if (storedUsersEmailID) {
+            const response = await axios.get(
+              `${react_url}/userdetails/${storedUsersEmailID}`
+            );
+            const userData = response.data;
+            setCurrentUser(userData);
+            setPublicInfo((prevState) => ({
+              ...prevState,
+              username: userData.username,
+              bio: userData.bio,
+              email: storedUsersEmailID,
+            }));
+            setPrivateInfo((prevState) => ({
+              ...prevState,
+              email: storedUsersEmailID,
+              firstname: userData.firstname,
+              lastname: userData.lastname,
+            }));
+            setText((prevState) => ({
+              ...prevState,
+              linkedin: userData.linkedin,
+              instagram: userData.instagram,
+              github: userData.github,
+              twitter: userData.twitter,
+              facebook: userData.facebook,
+              email: storedUsersEmailID,
+            }));
+          }
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    toast.promise(fetchDetails(), {
-      loading: 'Getting your details...',
-      error: 'Error in getting your details',
-      success: 'Details Recieved Successfully',
-    });
-  }, []);
+      };
+      toast.promise(fetchDetails(), {
+        loading: 'Getting your details...',
+        error: 'Error in getting your details',
+        success: 'Details Recieved Successfully',
+      });
+    }
+  }, [usenavigate]);
   return (
     <div className='profile_body'>
       <div className='container p-0'>
@@ -692,6 +698,7 @@ export const Profile = ({ screenSize }) => {
                               className='form-control'
                               id='inputUsername'
                               placeholder='Username'
+                              autoComplete='off'
                             />
                           </div>
                           <div
@@ -819,6 +826,7 @@ export const Profile = ({ screenSize }) => {
                             className='form-control'
                             id='inputFirstName'
                             placeholder='First name'
+                            autoComplete='off'
                           />
                         </div>
                         <div className='form-group col-md-6'>
@@ -835,6 +843,7 @@ export const Profile = ({ screenSize }) => {
                             className='form-control'
                             id='inputLastName'
                             placeholder='Last name'
+                            autoComplete='off'
                           />
                         </div>
                       </div>
@@ -843,13 +852,6 @@ export const Profile = ({ screenSize }) => {
                         <input
                           type='email'
                           value={usersEmailID}
-                          // value={privateInfo.email}
-                          // onChange={(e) =>
-                          //   setPrivateInfo((prevPrivateInfo) => ({
-                          //     ...prevPrivateInfo,
-                          //     email: e.target.value,
-                          //   }))
-                          // }
                           disabled
                           className='form-control'
                           id='inputEmail4'

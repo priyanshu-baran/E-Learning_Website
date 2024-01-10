@@ -1,6 +1,9 @@
 import { Divider } from 'primereact/divider';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
+import { react_url } from '.';
+import Cookies from 'js-cookie';
 
 export const Courses = ({
   identifier,
@@ -14,19 +17,29 @@ export const Courses = ({
 }) => {
   const slider = `slider_${identifier}`;
   const [isFavourite, setIsFavourite] = useState(false);
-  const handleFavourite = () => {
+  const [usersEmailID, setUsersEmailID] = useState('');
+  const handleFavourite = async () => {
     setIsFavourite((prevIsFavourite) => !prevIsFavourite);
     isFavourite
       ? toast.success('Removed from favorites')
       : toast.success('Added to favorites');
-    const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    const storedFavorites =
+      JSON.parse(sessionStorage.getItem('favorites')) || [];
     const updatedFavorites = isFavourite
       ? storedFavorites.filter((fav) => fav !== name)
       : [...storedFavorites, name];
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+    sessionStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+    await axios.post(`${react_url}/userdetails/add`, {
+      email: usersEmailID,
+      favoriteCourses: updatedFavorites,
+    });
   };
   useEffect(() => {
-    const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    const storedUsersEmailID =
+      Cookies.get('usersEmailID') || sessionStorage.getItem('usersEmailID');
+    setUsersEmailID(storedUsersEmailID);
+    const storedFavorites =
+      JSON.parse(sessionStorage.getItem('favorites')) || [];
     setIsFavourite(storedFavorites.includes(name));
   }, [name]);
   return (

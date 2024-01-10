@@ -41,6 +41,9 @@ const userSchema = new Schema(
     facebook: {
       type: String,
     },
+    favoriteCourses: {
+      type: Array,
+    },
   },
   {
     timestamps: true,
