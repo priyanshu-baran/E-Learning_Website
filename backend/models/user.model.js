@@ -9,40 +9,58 @@ const userSchema = new Schema(
       unique: true,
       trim: true,
     },
-    bio: {
-      type: String,
-    },
-    profilepic: {
-      type: Buffer,
-    },
-    firstname: {
-      type: String,
-    },
-    lastname: {
-      type: String,
-    },
     email: {
       type: String,
       unique: true,
       match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
     },
-    linkedin: {
-      type: String,
-    },
-    instagram: {
-      type: String,
-    },
-    github: {
-      type: String,
-    },
-    twitter: {
-      type: String,
-    },
-    facebook: {
-      type: String,
+    country: {
+      name: {
+        type: String,
+      },
+      code: {
+        type: String,
+      },
     },
     favoriteCourses: {
-      type: Array,
+      type: [String],
+    },
+    paymentStatus: {
+      type: String,
+    },
+    verified: {
+      type: Boolean,
+    },
+    person: {
+      firstname: {
+        type: String,
+      },
+      lastname: {
+        type: String,
+      },
+      profilepic: {
+        type: String,
+      },
+      bio: {
+        type: String,
+      },
+    },
+    socialLinks: {
+      linkedin: {
+        type: String,
+      },
+      instagram: {
+        type: String,
+      },
+      github: {
+        type: String,
+      },
+      twitter: {
+        type: String,
+      },
+      facebook: {
+        type: String,
+      },
     },
   },
   {

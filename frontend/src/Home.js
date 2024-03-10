@@ -10,6 +10,8 @@ import { Menu } from 'primereact/menu';
 import { Dropdown } from 'primereact/dropdown';
 import { MultiStateCheckbox } from 'primereact/multistatecheckbox';
 import { InputText } from 'primereact/inputtext';
+import { Password } from 'primereact/password';
+import { Divider } from 'primereact/divider';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import {
@@ -34,8 +36,6 @@ import { Pagination } from './Pagination';
 import { Preloader } from './Preloader';
 import { Speeddial } from './Speeddial';
 import { Pricing } from './Pricing';
-import { Password } from 'primereact/password';
-import { Divider } from 'primereact/divider';
 
 export const Home = ({ screenSize }) => {
   const [modalChange, setModalChange] = useState(false);
@@ -100,7 +100,6 @@ export const Home = ({ screenSize }) => {
       .required('*Email is required')
       .matches(/^[\w-\\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Invalid email address'),
     password: Yup.string().required('*Password is required'),
-    // .min(8, 'Password is too small'),
     coPassword: Yup.string()
       .oneOf([Yup.ref('password'), null], 'Passwords must match')
       .required('*Confirm Password is required'),
@@ -154,6 +153,7 @@ export const Home = ({ screenSize }) => {
       setIsValidUser(false);
       sessionStorage.removeItem('isValidUser');
       sessionStorage.removeItem('usersEmailID');
+      sessionStorage.removeItem('favorites');
     } catch (error) {
       console.log('error signing out: ', error);
     }

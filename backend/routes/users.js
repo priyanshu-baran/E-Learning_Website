@@ -3,10 +3,27 @@ const router = express.Router();
 
 import User from '../models/user.model.js';
 
-router.route('/').get((req, res) => {
-  User.find()
-    .then((users) => res.json(users))
-    .catch((err) => res.status(400).json('Error: ' + err));
+router.route('/').get(async (req, res) => {
+  try {
+    const { size } = req.query;
+    let users;
+    if (size === 'small') {
+      users = await User.find().limit(10);
+    } else if (size === 'medium') {
+      users = await User.find().limit(50);
+    } else if (size === 'large') {
+      users = await User.find().limit(200);
+    } else {
+      users = await User.find();
+    }
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+  // User.find()
+  //   .then((users) => res.json(users))
+  //   .catch((err) => res.status(400).json('Error: ' + err));
 });
 
 router
@@ -41,49 +58,38 @@ router
 router.route('/add').post(async (req, res) => {
   const {
     username,
-    bio,
-    profilepic,
-    firstname,
-    lastname,
     email,
-    linkedin,
-    instagram,
-    github,
-    twitter,
-    facebook,
+    country,
     favoriteCourses,
+    paymentStatus,
+    verified,
+    person,
+    socialLinks,
   } = req.body;
   try {
     let existingUser = await User.findOne({ email });
     if (existingUser) {
       if (username !== undefined) existingUser.username = username;
-      if (bio !== undefined) existingUser.bio = bio;
-      if (profilepic !== undefined) existingUser.profilepic = profilepic;
-      if (firstname !== undefined) existingUser.firstname = firstname;
-      if (lastname !== undefined) existingUser.lastname = lastname;
-      if (linkedin !== undefined) existingUser.linkedin = linkedin;
-      if (instagram !== undefined) existingUser.instagram = instagram;
-      if (github !== undefined) existingUser.github = github;
-      if (twitter !== undefined) existingUser.twitter = twitter;
-      if (facebook !== undefined) existingUser.facebook = facebook;
+      if (country !== undefined) existingUser.country = country;
       if (favoriteCourses !== undefined)
         existingUser.favoriteCourses = favoriteCourses;
+      if (paymentStatus !== undefined)
+        existingUser.paymentStatus = paymentStatus;
+      if (verified !== undefined) existingUser.verified = verified;
+      if (person !== undefined) existingUser.person = person;
+      if (socialLinks !== undefined) existingUser.socialLinks = socialLinks;
       await existingUser.save();
       res.json('User profile updated!');
     } else {
       const newUser = new User({ email });
       if (username !== undefined) newUser.username = username;
-      if (bio !== undefined) newUser.bio = bio;
-      if (profilepic !== undefined) newUser.profilepic = profilepic;
-      if (firstname !== undefined) newUser.firstname = firstname;
-      if (lastname !== undefined) newUser.lastname = lastname;
-      if (linkedin !== undefined) newUser.linkedin = linkedin;
-      if (instagram !== undefined) newUser.instagram = instagram;
-      if (github !== undefined) newUser.github = github;
-      if (twitter !== undefined) newUser.twitter = twitter;
-      if (facebook !== undefined) newUser.facebook = facebook;
+      if (country !== undefined) newUser.country = country;
       if (favoriteCourses !== undefined)
         newUser.favoriteCourses = favoriteCourses;
+      if (paymentStatus !== undefined) newUser.paymentStatus = paymentStatus;
+      if (verified !== undefined) newUser.verified = verified;
+      if (person !== undefined) newUser.person = person;
+      if (socialLinks !== undefined) newUser.socialLinks = socialLinks;
       await newUser.save();
       res.json('New user created!');
     }

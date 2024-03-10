@@ -33,22 +33,28 @@ export const Profile = ({ screenSize }) => {
   const [usersEmailID, setUsersEmailID] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [text, setText] = useState({
-    linkedin: '',
-    twitter: '',
-    github: '',
-    instagram: '',
-    facebook: '',
+    socialLinks: {
+      linkedin: '',
+      twitter: '',
+      github: '',
+      instagram: '',
+      facebook: '',
+    },
     email: '',
   });
   const [publicInfo, setPublicInfo] = useState({
     username: '',
-    bio: '',
+    person: {
+      bio: '',
+    },
     email: '',
   });
   const [privateInfo, setPrivateInfo] = useState({
     email: '',
-    firstname: '',
-    lastname: '',
+    person: {
+      firstname: '',
+      lastname: '',
+    },
   });
   const header = <div className='font-bold mb-3'>Pick a password</div>;
   const footer = (
@@ -257,22 +263,32 @@ export const Profile = ({ screenSize }) => {
             setPublicInfo((prevState) => ({
               ...prevState,
               username: userData.username,
-              bio: userData.bio,
+              person: {
+                ...prevState.person,
+                bio: userData.person && userData.person.bio,
+              },
               email: storedUsersEmailID,
             }));
             setPrivateInfo((prevState) => ({
               ...prevState,
               email: storedUsersEmailID,
-              firstname: userData.firstname,
-              lastname: userData.lastname,
+              person: {
+                ...prevState.person,
+                firstname: userData.person && userData.person.firstname,
+                lastname: userData.person && userData.person.lastname,
+              },
             }));
             setText((prevState) => ({
               ...prevState,
-              linkedin: userData.linkedin,
-              instagram: userData.instagram,
-              github: userData.github,
-              twitter: userData.twitter,
-              facebook: userData.facebook,
+              socialLinks: {
+                ...prevState.socialLinks,
+                linkedin: userData.socialLinks && userData.socialLinks.linkedin,
+                instagram:
+                  userData.socialLinks && userData.socialLinks.instagram,
+                github: userData.socialLinks && userData.socialLinks.github,
+                twitter: userData.socialLinks && userData.socialLinks.twitter,
+                facebook: userData.socialLinks && userData.socialLinks.facebook,
+              },
               email: storedUsersEmailID,
             }));
           }
@@ -441,7 +457,9 @@ export const Profile = ({ screenSize }) => {
                 <div className='d-flex align-items-center'>
                   <Tooltip target='.fa-linkedin' />
                   <i
-                    onClick={() => handleSocialLinks(text.linkedin, 'linkedin')}
+                    onClick={() =>
+                      handleSocialLinks(text.socialLinks.linkedin, 'linkedin')
+                    }
                     style={{ cursor: 'pointer' }}
                     data-pr-tooltip='LinkedIn'
                     data-pr-position='Left'
@@ -452,19 +470,26 @@ export const Profile = ({ screenSize }) => {
                     closable
                     onClose={async () => {
                       const updatedText = { ...text, email: usersEmailID };
-                      text.linkedin &&
+                      text.socialLinks.linkedin &&
                         (await axios
                           .post(`${react_url}/userdetails/add`, updatedText)
                           .then(() => toast.success('Updated')));
                     }}>
                     <InplaceDisplay>
-                      {text.linkedin || 'https://www.linkedin.com/in/'}
+                      {text.socialLinks.linkedin ||
+                        'https://www.linkedin.com/in/'}
                     </InplaceDisplay>
                     <InplaceContent>
                       <InputText
-                        value={text.linkedin}
+                        value={text.socialLinks.linkedin}
                         onChange={(e) =>
-                          setText({ ...text, linkedin: e.target.value })
+                          setText((prevState) => ({
+                            ...prevState,
+                            socialLinks: {
+                              ...prevState.socialLinks,
+                              linkedin: e.target.value,
+                            },
+                          }))
                         }
                         autoFocus
                       />
@@ -476,7 +501,7 @@ export const Profile = ({ screenSize }) => {
                   <Tooltip target='.fa-instagram' />
                   <i
                     onClick={() =>
-                      handleSocialLinks(text.instagram, 'instagram')
+                      handleSocialLinks(text.socialLinks.instagram, 'instagram')
                     }
                     style={{ cursor: 'pointer' }}
                     data-pr-tooltip='Instagram'
@@ -488,19 +513,26 @@ export const Profile = ({ screenSize }) => {
                     closable
                     onClose={async () => {
                       const updatedText = { ...text, email: usersEmailID };
-                      text.instagram &&
+                      text.socialLinks.instagram &&
                         (await axios
                           .post(`${react_url}/userdetails/add`, updatedText)
                           .then(() => toast.success('Updated')));
                     }}>
                     <InplaceDisplay>
-                      {text.instagram || 'https://www.instagram.com/'}
+                      {text.socialLinks.instagram ||
+                        'https://www.instagram.com/'}
                     </InplaceDisplay>
                     <InplaceContent>
                       <InputText
-                        value={text.instagram}
+                        value={text.socialLinks.instagram}
                         onChange={(e) =>
-                          setText({ ...text, instagram: e.target.value })
+                          setText((prevState) => ({
+                            ...prevState,
+                            socialLinks: {
+                              ...prevState.socialLinks,
+                              instagram: e.target.value,
+                            },
+                          }))
                         }
                         autoFocus
                       />
@@ -511,7 +543,9 @@ export const Profile = ({ screenSize }) => {
                 <div className='d-flex align-items-center'>
                   <Tooltip target='.fa-github' />
                   <i
-                    onClick={() => handleSocialLinks(text.github, 'github')}
+                    onClick={() =>
+                      handleSocialLinks(text.socialLinks.github, 'github')
+                    }
                     style={{ cursor: 'pointer' }}
                     data-pr-tooltip='GitHub'
                     data-pr-position='Left'
@@ -522,19 +556,25 @@ export const Profile = ({ screenSize }) => {
                     closable
                     onClose={async () => {
                       const updatedText = { ...text, email: usersEmailID };
-                      text.github &&
+                      text.socialLinks.github &&
                         (await axios
                           .post(`${react_url}/userdetails/add`, updatedText)
                           .then(() => toast.success('Updated')));
                     }}>
                     <InplaceDisplay>
-                      {text.github || 'https://github.com/'}
+                      {text.socialLinks.github || 'https://github.com/'}
                     </InplaceDisplay>
                     <InplaceContent>
                       <InputText
-                        value={text.github}
+                        value={text.socialLinks.github}
                         onChange={(e) =>
-                          setText({ ...text, github: e.target.value })
+                          setText((prevState) => ({
+                            ...prevState,
+                            socialLinks: {
+                              ...prevState.socialLinks,
+                              github: e.target.value,
+                            },
+                          }))
                         }
                         autoFocus
                       />
@@ -545,7 +585,9 @@ export const Profile = ({ screenSize }) => {
                 <div className='d-flex align-items-center'>
                   <Tooltip target='.fa-twitter' />
                   <i
-                    onClick={() => handleSocialLinks(text.twitter, 'twitter')}
+                    onClick={() =>
+                      handleSocialLinks(text.socialLinks.twitter, 'twitter')
+                    }
                     style={{ cursor: 'pointer' }}
                     data-pr-tooltip='Twitter'
                     data-pr-position='Left'
@@ -556,19 +598,25 @@ export const Profile = ({ screenSize }) => {
                     closable
                     onClose={async () => {
                       const updatedText = { ...text, email: usersEmailID };
-                      text.twitter &&
+                      text.socialLinks.twitter &&
                         (await axios
                           .post(`${react_url}/userdetails/add`, updatedText)
                           .then(() => toast.success('Updated')));
                     }}>
                     <InplaceDisplay>
-                      {text.twitter || 'https://twitter.com/'}
+                      {text.socialLinks.twitter || 'https://twitter.com/'}
                     </InplaceDisplay>
                     <InplaceContent>
                       <InputText
-                        value={text.twitter}
+                        value={text.socialLinks.twitter}
                         onChange={(e) =>
-                          setText({ ...text, twitter: e.target.value })
+                          setText((prevState) => ({
+                            ...prevState,
+                            socialLinks: {
+                              ...prevState.socialLinks,
+                              twitter: e.target.value,
+                            },
+                          }))
                         }
                         autoFocus
                       />
@@ -579,7 +627,9 @@ export const Profile = ({ screenSize }) => {
                 <div className='d-flex align-items-center'>
                   <Tooltip target='.fa-facebook' />
                   <i
-                    onClick={() => handleSocialLinks(text.facebook, 'facebook')}
+                    onClick={() =>
+                      handleSocialLinks(text.socialLinks.facebook, 'facebook')
+                    }
                     style={{ cursor: 'pointer' }}
                     data-pr-tooltip='Facebook'
                     data-pr-position='Left'
@@ -590,19 +640,25 @@ export const Profile = ({ screenSize }) => {
                     closable
                     onClose={async () => {
                       const updatedText = { ...text, email: usersEmailID };
-                      text.facebook &&
+                      text.socialLinks.facebook &&
                         (await axios
                           .post(`${react_url}/userdetails/add`, updatedText)
                           .then(() => toast.success('Updated')));
                     }}>
                     <InplaceDisplay>
-                      {text.facebook || 'https://www.facebook.com/'}
+                      {text.socialLinks.facebook || 'https://www.facebook.com/'}
                     </InplaceDisplay>
                     <InplaceContent>
                       <InputText
-                        value={text.facebook}
+                        value={text.socialLinks.facebook}
                         onChange={(e) =>
-                          setText({ ...text, facebook: e.target.value })
+                          setText((prevState) => ({
+                            ...prevState,
+                            socialLinks: {
+                              ...prevState.socialLinks,
+                              facebook: e.target.value,
+                            },
+                          }))
                         }
                         autoFocus
                       />
@@ -708,11 +764,14 @@ export const Profile = ({ screenSize }) => {
                             <label htmlFor='inputUsername'>Biography</label>
                             <textarea
                               rows='2'
-                              value={publicInfo.bio}
+                              value={publicInfo.person.bio}
                               onChange={(e) =>
                                 setPublicInfo((prevPublicInfo) => ({
                                   ...prevPublicInfo,
-                                  bio: e.target.value,
+                                  person: {
+                                    ...prevPublicInfo.person,
+                                    bio: e.target.value,
+                                  },
                                 }))
                               }
                               className='form-control'
@@ -816,11 +875,14 @@ export const Profile = ({ screenSize }) => {
                           <label htmlFor='inputFirstName'>First name</label>
                           <input
                             type='text'
-                            value={privateInfo.firstname}
+                            value={privateInfo.person.firstname}
                             onChange={(e) =>
                               setPrivateInfo((prevPrivateInfo) => ({
                                 ...prevPrivateInfo,
-                                firstname: e.target.value,
+                                person: {
+                                  ...prevPrivateInfo.person,
+                                  firstname: e.target.value,
+                                },
                               }))
                             }
                             className='form-control'
@@ -833,11 +895,14 @@ export const Profile = ({ screenSize }) => {
                           <label htmlFor='inputLastName'>Last name</label>
                           <input
                             type='text'
-                            value={privateInfo.lastname}
+                            value={privateInfo.person.lastname}
                             onChange={(e) =>
                               setPrivateInfo((prevPrivateInfo) => ({
                                 ...prevPrivateInfo,
-                                lastname: e.target.value,
+                                person: {
+                                  ...prevPrivateInfo.person,
+                                  lastname: e.target.value,
+                                },
                               }))
                             }
                             className='form-control'

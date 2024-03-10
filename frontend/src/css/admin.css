@@ -14,6 +14,26 @@ html {
   scroll-behavior: smooth;
 }
 
+span.flag {
+  width: 44px;
+  height: 30px;
+  display: inline-block;
+}
+
+img.flag {
+  width: 30px;
+}
+
+.flag {
+  background: url(https://primefaces.org/cdn/primereact/images/flag/flags_responsive.png) no-repeat;
+  background-size: 100%;
+  vertical-align: middle;
+}
+
+.flag-in {
+  background-position: 0 40.909091%
+}
+
 :root {
   /* ===== Colors ===== */
   --primary-color: #0E4BF1;
@@ -35,8 +55,22 @@ html {
 
 .home_body {
   min-height: 100vh;
-  background-color: var(--primary-color);
 }
+
+.card button {
+  outline: none !important;
+  border-radius: 8px;
+}
+
+.p-column-filter-overlay button {
+  outline: none !important;
+  border-radius: 8px;
+}
+
+/* .p-column-filter-overlay button {
+  outline: none !important;
+  border-radius: 8px;
+} */
 
 .home_body.dark {
   --primary-color: #3A3B3C;
@@ -89,6 +123,7 @@ html {
 
 .admin_nav.close {
   width: 73px;
+  opacity: 1;
 }
 
 .admin_nav .logo-name {
@@ -287,7 +322,9 @@ html {
 .top .search-box input {
   position: absolute;
   border: 1px solid var(--border-color);
-  background-color: var(--panel-color);
+  /* background-color: var(--panel-color); */
+  background-color: rgb(231, 228, 228);
+  border: 1px solid rgba(133, 130, 130, 0.774);
   padding: 0 25px 0 50px;
   border-radius: 5px;
   height: 100%;
@@ -416,6 +453,33 @@ html {
   margin-top: 20px;
   white-space: nowrap;
   color: var(--text-color);
+}
+
+.p-tabview-ink-bar {
+  bottom: 16px;
+}
+
+.p-unselectable-text a:hover {
+  color: blue;
+}
+
+.shortcut-text {
+  display: flex;
+  position: relative;
+  top: 4.2px;
+  left: 495px;
+  align-items: center;
+}
+
+.shortcut-text1 {
+  font-family: cursive;
+  border: 2px outset rgba(133, 130, 130, 0.555);
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.search-box input:focus {
+  background-color: rgba(202, 201, 201, 0.35);
 }
 
 @media (max-width: 1000px) {
