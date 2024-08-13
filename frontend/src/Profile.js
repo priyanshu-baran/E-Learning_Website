@@ -44,9 +44,9 @@ export const Profile = ({ screenSize }) => {
   });
   const [publicInfo, setPublicInfo] = useState({
     username: '',
-    person: {
-      bio: '',
-    },
+    // person: {
+    bio: '',
+    // },
     email: '',
   });
   const [privateInfo, setPrivateInfo] = useState({
@@ -263,10 +263,10 @@ export const Profile = ({ screenSize }) => {
             setPublicInfo((prevState) => ({
               ...prevState,
               username: userData.username,
-              person: {
-                ...prevState.person,
-                bio: userData.person && userData.person.bio,
-              },
+              // person: {
+              //   ...prevState.person,
+              bio: userData.bio,
+              // },
               email: storedUsersEmailID,
             }));
             setPrivateInfo((prevState) => ({
@@ -768,10 +768,10 @@ export const Profile = ({ screenSize }) => {
                               onChange={(e) =>
                                 setPublicInfo((prevPublicInfo) => ({
                                   ...prevPublicInfo,
-                                  person: {
-                                    ...prevPublicInfo.person,
-                                    bio: e.target.value,
-                                  },
+                                  // person: {
+                                  //   ...prevPublicInfo.person,
+                                  bio: e.target.value,
+                                  // },
                                 }))
                               }
                               className='form-control'
