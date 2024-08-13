@@ -331,6 +331,21 @@ export const Home = ({ screenSize }) => {
     window.onscroll = calcScrollValue;
   }, [isValidUser]);
   useEffect(() => {
+    toast(
+      () => (
+        <span>
+          <center>
+            <b>⚠️ Attention..!!!</b>
+            <br />
+            It's possible that when you visit, my free host service might become
+            unaccessible leading to unnecessary delays in responses.
+          </center>
+        </span>
+      ),
+      {
+        duration: 10000,
+      }
+    );
     axios
       .get(`${react_url}/coursedetails/`)
       .then((res) => {
