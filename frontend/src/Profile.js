@@ -265,7 +265,7 @@ export const Profile = ({ screenSize }) => {
               username: userData.username,
               person: {
                 ...prevState.person,
-                bio: userData.person && userData.person.bio,
+                bio: userData.person?.bio || prevState.person.bio,
               },
               email: storedUsersEmailID,
             }));
@@ -274,8 +274,10 @@ export const Profile = ({ screenSize }) => {
               email: storedUsersEmailID,
               person: {
                 ...prevState.person,
-                firstname: userData.person && userData.person.firstname,
-                lastname: userData.person && userData.person.lastname,
+                firstname:
+                  userData.person?.firstname || prevState.person.firstname,
+                lastname:
+                  userData.person?.lastname || prevState.person.lastname,
               },
             }));
             setText((prevState) => ({
