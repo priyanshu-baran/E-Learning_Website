@@ -113,7 +113,7 @@ export const Home = ({ screenSize }) => {
       try {
         await toast.promise(signIn({ username: email, password: pass }), {
           loading: 'Processing Request...',
-          error: 'Error in logging in',
+          error: 'Invalid Credentials',
           success: 'Logged In Successfully',
         });
         sessionStorage.setItem('isValidUser', true);
@@ -133,7 +133,6 @@ export const Home = ({ screenSize }) => {
         }, 1000);
       } catch (error) {
         console.error('Error signing in:', error);
-        toast.error('Invalid Credentials');
       }
     }
   };
