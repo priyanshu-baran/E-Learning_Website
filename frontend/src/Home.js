@@ -111,10 +111,7 @@ export const Home = ({ screenSize }) => {
       toast.success('Admin Logged In Successfully');
     } else {
       try {
-        const waitSignin = async () => {
-          await signIn({ username: email, password: pass });
-        };
-        toast.promise(waitSignin(), {
+        await toast.promise(signIn({ username: email, password: pass }), {
           loading: 'Processing Request...',
           error: 'Error in logging in',
           success: 'Logged In Successfully',
